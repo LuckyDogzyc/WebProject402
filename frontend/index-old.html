@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>402 虚拟生活社区系统 - 八方旅人风格</title>
+    <title>402 虚拟生活社区系统</title>
     <style>
         * {
             margin: 0;
@@ -12,40 +12,25 @@
         }
         
         body {
-            background: linear-gradient(135deg, #1a1a1a 0%, #2c3e50 100%);
+            background-color: #1a1a1a;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            font-family: 'Georgia', 'Times New Roman', serif;
+            font-family: Arial, sans-serif;
             overflow: hidden;
         }
         
         #game-container {
             position: relative;
-            box-shadow: 0 0 50px rgba(139, 69, 19, 0.5);
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        
-        #loading {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: #FFF8DC;
-            font-size: 24px;
-            text-align: center;
-            font-family: 'Georgia', serif;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
         }
     </style>
 </head>
 <body>
-    <div id="game-container">
-        <div id="loading">⏳ 正在加载 402 虚拟生活社区系统...</div>
-    </div>
+    <div id="game-container"></div>
     
-    <!-- 使用 UMD 版本的 Phaser -->
+    <!-- 使用 UMD 版本的 Phaser（更稳定） -->
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script>
     
     <script>
@@ -64,13 +49,13 @@
                 const height = this.cameras.main.height;
                 
                 const progressBarBg = this.add.graphics();
-                progressBarBg.fillStyle(0x8B4513, 1);
-                progressBarBg.fillRect(width/4, height/2 - 15, width/2, 30);
+                progressBarBg.fillStyle(0x333333, 1);
+                progressBarBg.fillRect(width / 4, height / 2 - 15, width / 2, 30);
                 
                 this.load.on('progress', (value) => {
                     progressBar.clear();
-                    progressBar.fillStyle(0xFFD700, 1);
-                    progressBar.fillRect(width/4, height/2 - 15, (width/2) * value, 30);
+                    progressBar.fillStyle(0x4CAF50, 1);
+                    progressBar.fillRect(width / 4, height / 2 - 15, (width / 2) * value, 30);
                 });
                 
                 this.load.on('complete', () => {
@@ -79,31 +64,33 @@
                     console.log('✅ 资源加载完成');
                 });
 
-                // 加载八方旅人风格角色
-                const members = ['chu', 'bo', 'hao', 'zhu', 'dong', 'qian'];
+                // 加载真实的角色 PNG 文件
+                const members = ['chu', 'bo', 'hao', 'qian', 'dong', 'zhu'];
                 const charFiles = {
                     'chu': 'assets/skins/characters/初.png',
                     'bo': 'assets/skins/characters/博.png',
                     'hao': 'assets/skins/characters/昊.png',
-                    'zhu': 'assets/skins/characters/竹.png',
+                    'qian': 'assets/skins/characters/千.png',
                     'dong': 'assets/skins/characters/东.png',
-                    'qian': 'assets/skins/characters/千.png'
+                    'zhu': 'assets/skins/characters/竹.png'
                 };
                 
-                members.forEach(member => {
+                members.forEach((member, index) => {
                     this.load.image(member, charFiles[member]);
+                    console.log(`✅ 加载角色: ${member} -> ${charFiles[member]}`);
+                    
+                    // 注册为精灵图（单帧，64x64）
                     this.load.spritesheet(member, charFiles[member], {
                         frameWidth: 64,
                         frameHeight: 64
                     });
-                    console.log(`✅ 加载角色: ${member}`);
                 });
             }
 
             create() {
                 console.log('🎮 创建动画...');
                 this.createCharacterAnimations();
-                console.log('✅ 八方旅人风格系统初始化完成');
+                console.log('✅ Phaser 3 初始化完成');
                 this.time.delayedCall(1000, () => {
                     console.log('🏠 启动主场景...');
                     this.scene.start('Home');
@@ -111,13 +98,34 @@
             }
 
             createCharacterAnimations() {
-                const members = ['chu', 'bo', 'hao', 'zhu', 'dong', 'qian'];
+                const members = ['chu', 'bo', 'hao', 'qian', 'dong', 'zhu'];
                 
                 members.forEach(member => {
                     this.anims.create({
                         key: `${member}_idle`,
                         frames: [{ key: member, frame: 0 }],
                         frameRate: 1,
+                        repeat: -1
+                    });
+
+                    this.anims.create({
+                        key: `${member}_walk`,
+                        frames: [{ key: member, frame: 0 }],
+                        frameRate: 8,
+                        repeat: -1
+                    });
+
+                    this.anims.create({
+                        key: `${member}_work`,
+                        frames: [{ key: member, frame: 0 }],
+                        frameRate: 8,
+                        repeat: -1
+                    });
+
+                    this.anims.create({
+                        key: `${member}_drunk`,
+                        frames: [{ key: member, frame: 0 }],
+                        frameRate: 2,
                         repeat: -1
                     });
                 });
@@ -150,13 +158,11 @@
             }
 
             createNameLabel() {
-                this.nameLabel = this.scene.add.text(this.x, this.y - 50, this.characterName, {
-                    fontSize: '18px',
-                    fill: '#3E2723',
-                    backgroundColor: 'rgba(255,248,220, 0.8)',
-                    padding: { x: 8, y: 4 },
-                    fontFamily: 'Georgia, serif',
-                    fontStyle: 'bold'
+                this.nameLabel = this.scene.add.text(this.x, this.y - 30, this.characterName, {
+                    fontSize: '14px',
+                    fill: '#fff',
+                    backgroundColor: 'rgba(0,0,0,0.5)',
+                    padding: { x: 5, y: 2 }
                 });
                 this.nameLabel.setOrigin(0.5);
             }
@@ -171,8 +177,7 @@
                     targets: this,
                     scaleX: 1.1,
                     scaleY: 1.1,
-                    duration: 150,
-                    ease: 'Sine.easeInOut'
+                    duration: 100
                 });
             }
 
@@ -181,8 +186,7 @@
                     targets: this,
                     scaleX: 1,
                     scaleY: 1,
-                    duration: 150,
-                    ease: 'Sine.easeInOut'
+                    duration: 100
                 });
             }
 
@@ -194,67 +198,55 @@
                     this.currentMenu.destroy();
                 }
                 
-                const menu = scene.add.container(this.x, this.y - 120);
+                const menu = scene.add.container(this.x, this.y - 100);
                 this.currentMenu = menu;
                 
-                // 背景（八方旅人风格边框）
-                const bg = scene.add.rectangle(0, 0, 220, 220, 0xFFF8DC);
-                bg.setStrokeStyle(4, 0x8B4513);
+                // 背景
+                const bg = scene.add.rectangle(0, 0, 200, 200, 0xffffff);
+                bg.setStrokeStyle(2, 0x000000);
                 menu.add(bg);
                 
-                // 内边框
-                const innerBg = scene.add.rectangle(0, 0, 200, 200, 0xFFFAF0);
-                menu.add(innerBg);
-                
                 // 标题
-                const title = scene.add.text(0, -90, this.characterName, {
-                    fontSize: '20px',
-                    fill: '#5D4037',
-                    fontStyle: 'bold',
-                    fontFamily: 'Georgia, serif',
-                    stroke: '#3E2723',
-                    strokeThickness: 2
+                const title = scene.add.text(0, -80, this.characterName, {
+                    fontSize: '18px',
+                    fill: '#000',
+                    fontStyle: 'bold'
                 });
                 title.setOrigin(0.5);
                 menu.add(title);
                 
                 // 按钮分组
                 const buttons = [
+                    // 主要按钮
                     { 
-                        text: '⚔ 动作', 
+                        text: '🎯 动作', 
                         action: () => this.showActionMenu(),
-                        color: '#8B4513',
+                        color: '#4CAF50',
                         y: -40
                     },
                     { 
-                        text: '📜 信息', 
+                        text: 'ℹ️ 信息', 
                         action: () => this.showInfo(),
-                        color: '#6B8E23',
-                        y: 10
+                        color: '#2196F3',
+                        y: 0
                     },
                     { 
                         text: '❌ 关闭', 
                         action: () => menu.destroy(),
-                        color: '#C0392B',
+                        color: '#f44336',
                         y: 60
                     }
                 ];
                 
                 buttons.forEach(btn => {
-                    const button = scene.add.rectangle(0, btn.y, 160, 40, btn.color);
-                    button.setStrokeStyle(2, 0x3E2723);
-                    button.setInteractive();
-                    menu.add(button);
-                    
-                    const buttonText = scene.add.text(0, btn.y, btn.text, {
-                        fontSize: '18px',
-                        fill: '#FFF8DC',
-                        fontFamily: 'Georgia, serif',
-                        fontStyle: 'bold'
+                    const button = scene.add.text(0, btn.y, btn.text, {
+                        fontSize: '16px',
+                        fill: '#fff',
+                        backgroundColor: btn.color,
+                        padding: { x: 12, y: 8 }
                     });
-                    buttonText.setOrigin(0.5);
-                    menu.add(buttonText);
-                    
+                    button.setOrigin(0.5);
+                    button.setInteractive();
                     button.on('pointerdown', btn.action);
                     button.on('pointerover', () => {
                         scene.tweens.add({
@@ -267,64 +259,111 @@
                     button.on('pointerout', () => {
                         button.setScale(1);
                     });
+                    menu.add(button);
                 });
                 
-                scene.time.delayedCall(10000, () => {
+                // 点击外部关闭
+                const closeHandler = () => {
                     menu.destroy();
                     this.currentMenu = null;
-                });
+                    scene.input.off('pointerdown', closeHandler);
+                };
+                
+                scene.time.delayedCall(8000, closeHandler);
             }
 
             showActionMenu() {
                 const scene = this.scene;
                 
+                // 关闭主菜单
                 if (this.currentMenu) {
                     this.currentMenu.destroy();
                 }
                 
-                const actionMenu = scene.add.container(this.x, this.y - 100);
+                const actionMenu = scene.add.container(this.x, this.y - 80);
                 this.currentMenu = actionMenu;
                 
-                const bg = scene.add.rectangle(0, 0, 240, 300, 0xFFF8DC);
-                bg.setStrokeStyle(4, 0x8B4513);
+                // 背景
+                const bg = scene.add.rectangle(0, 0, 220, 250, 0xffffff);
+                bg.setStrokeStyle(2, 0x000000);
                 actionMenu.add(bg);
                 
-                const title = scene.add.text(0, -130, '选择动作', {
-                    fontSize: '20px',
-                    fill: '#5D4037',
-                    fontStyle: 'bold',
-                    fontFamily: 'Georgia, serif'
+                // 标题
+                const title = scene.add.text(0, -100, '选择动作', {
+                    fontSize: '18px',
+                    fill: '#000',
+                    fontStyle: 'bold'
                 });
                 title.setOrigin(0.5);
                 actionMenu.add(title);
                 
+                // 动作按钮
                 const actions = [
-                    { text: '🍹 调酒', emoji: '🍹', action: () => this.makeDrink(), color: '#E67E22' },
-                    { text: '🍺 灌醉', emoji: '🍺', action: () => this.getDrunk(), color: '#E74C3C' },
-                    { text: '😴 休息', emoji: '😴', action: () => this.rest(), color: '#9B59B6' },
-                    { text: '🎨 换装', emoji: '🎨', action: () => this.changeSkin(), color: '#3498DB' },
-                    { text: '🎵 唱歌', emoji: '🎵', action: () => this.sing(), color: '#F1C40F' },
-                    { text: '💃 跳舞', emoji: '💃', action: () => this.dance(), color: '#E91E63' },
-                    { text: '📝 备忘', emoji: '📝', action: () => this.setMemo(), color: '#607D8B' },
-                    { text: '❌ 返回', emoji: '❌', action: () => {
-                        actionMenu.destroy();
-                        this.showInteractionMenu();
-                    }, color: '#95E5D5' }
+                    { 
+                        text: '🍹 调酒', 
+                        emoji: '🍹',
+                        action: () => this.makeDrink(),
+                        color: '#FF9800'
+                    },
+                    { 
+                        text: '🍺 灌醉', 
+                        emoji: '🍺',
+                        action: () => this.getDrunk(),
+                        color: '#F44336'
+                    },
+                    { 
+                        text: '😴 休息', 
+                        emoji: '😴',
+                        action: () => this.rest(),
+                        color: '#9C27B0'
+                    },
+                    { 
+                        text: '🎨 换装', 
+                        emoji: '🎨',
+                        action: () => this.changeSkin(),
+                        color: '#00BCD4'
+                    },
+                    { 
+                        text: '🎵 唱歌', 
+                        emoji: '🎵',
+                        action: () => this.sing(),
+                        color: '#FFEB3B'
+                    },
+                    { 
+                        text: '💃 跳舞', 
+                        emoji: '💃',
+                        action: () => this.dance(),
+                        color: '#E91E63'
+                    },
+                    { 
+                        text: '📝 备忘', 
+                        emoji: '📝',
+                        action: () => this.setMemo(),
+                        color: '#607D8B'
+                    },
+                    { 
+                        text: '❌ 返回', 
+                        emoji: '❌',
+                        action: () => {
+                            actionMenu.destroy();
+                            this.showInteractionMenu();
+                        },
+                        color: '#9E9E9E'
+                    }
                 ];
                 
                 actions.forEach((action, index) => {
-                    const x = -90 + (index % 2) * 90;
-                    const y = -90 + Math.floor(index / 2) * 50;
+                    const x = -80 + (index % 2) * 90;
+                    const y = -60 + Math.floor(index / 2) * 45;
                     
-                    const button = scene.add.rectangle(x, y, 80, 40, action.color);
-                    button.setStrokeStyle(2, 0x3E2723);
+                    const button = scene.add.rectangle(x, y, 80, 35, action.color);
+                    button.setStrokeStyle(1, 0x000000);
                     button.setInteractive();
                     actionMenu.add(button);
                     
                     const buttonText = scene.add.text(x, y, `${action.emoji}\n${action.text}`, {
-                        fontSize: '12px',
-                        fill: '#FFF8DC',
-                        fontFamily: 'Georgia, serif',
+                        fontSize: '11px',
+                        fill: '#fff',
                         align: 'center',
                         lineSpacing: 2
                     });
@@ -345,7 +384,8 @@
                     });
                 });
                 
-                scene.time.delayedCall(12000, () => {
+                // 点击外部关闭
+                scene.time.delayedCall(10000, () => {
                     actionMenu.destroy();
                     this.currentMenu = null;
                 });
@@ -353,31 +393,22 @@
 
             makeDrink() {
                 console.log(`🍹 ${this.characterName} 正在调酒`);
+                this.play(`${this.characterId}_work`);
                 this.showEffect('🍹 调酒中...');
-                this.scene.tweens.add({
-                    targets: this,
-                    scale: 1.2,
-                    duration: 150,
-                    yoyo: true,
-                    repeat: 2
-                });
                 this.scene.time.delayedCall(3000, () => {
+                    this.play(`${this.characterId}_idle`);
                     this.showEffect('✅ 调酒完成！');
                 });
             }
 
             getDrunk() {
                 console.log(`🥴 ${this.characterName} 被灌醉了`);
+                this.play(`${this.characterId}_drunk`);
                 this.showEffect('🥴 醉酒了！');
                 this.currentState = 'drunk';
-                this.scene.tweens.add({
-                    targets: this,
-                    angle: 15,
-                    duration: 2000,
-                    yoyo: true,
-                    repeat: 3
-                });
                 this.scene.time.delayedCall(10000, () => {
+                    this.play(`${this.characterId}_idle`);
+                    this.currentState = 'idle';
                     this.showEffect('😊 恢复清醒');
                 });
             }
@@ -385,12 +416,8 @@
             rest() {
                 console.log(`😴 ${this.characterName} 正在休息`);
                 this.showEffect('😴 休息中...');
-                this.scene.tweens.add({
-                    targets: this,
-                    alpha: 0.5,
-                    duration: 2000,
-                    yoyo: true,
-                    repeat: 1
+                this.scene.time.delayedCall(5000, () => {
+                    this.showEffect('⚡ 恢复活力！');
                 });
             }
 
@@ -404,8 +431,8 @@
                 this.showEffect('🎵 ~啦啦啦~');
                 this.scene.tweens.add({
                     targets: this,
-                    scale: 1.3,
-                    duration: 300,
+                    scale: 1.8,
+                    duration: 200,
                     yoyo: true,
                     repeat: 2
                 });
@@ -431,47 +458,34 @@
                 const scene = this.scene;
                 const infoText = `👤 名称: ${this.characterName}\n🎭 ID: ${this.characterId}\n❤️ 状态: ${this.currentState}`;
                 
-                const info = scene.add.text(this.x, this.y - 180, infoText, {
-                    fontSize: '14px',
-                    fill: '#3E2723',
-                    backgroundColor: '#FFF8DC',
-                    padding: { x: 12, y: 8 },
-                    lineSpacing: 4,
-                    fontFamily: 'Georgia, serif',
-                    stroke: '#8B4513',
-                    strokeThickness: 2
+                const info = scene.add.text(this.x, this.y - 150, infoText, {
+                    fontSize: '12px',
+                    fill: '#000',
+                    backgroundColor: '#fff',
+                    padding: { x: 10, y: 10 },
+                    lineSpacing: 5
                 });
                 info.setOrigin(0.5);
-                scene.time.delayedCall(5000, () => info.destroy());
+                scene.time.delayedCall(4000, () => info.destroy());
             }
 
             showEffect(text) {
                 const scene = this.scene;
-                const effectText = scene.add.text(this.x, this.y - 70, text, {
-                    fontSize: '16px',
-                    fill: '#5D4037',
-                    backgroundColor: 'rgba(255,248,220, 0.9)',
-                    padding: { x: 10, y: 6 },
-                    fontFamily: 'Georgia, serif',
-                    stroke: '#8B4513',
-                    strokeThickness: 2
+                const effectText = scene.add.text(this.x, this.y - 50, text, {
+                    fontSize: '14px',
+                    fill: '#fff',
+                    backgroundColor: '#000',
+                    padding: { x: 8, y: 4 }
                 });
                 effectText.setOrigin(0.5);
                 
                 scene.tweens.add({
                     targets: effectText,
-                    y: this.y - 100,
+                    y: this.y - 80,
                     alpha: 0,
-                    duration: 2500,
+                    duration: 2000,
                     onComplete: () => effectText.destroy()
                 });
-            }
-
-            destroy() {
-                if (this.nameLabel) {
-                    this.nameLabel.destroy();
-                }
-                super.destroy();
             }
         }
 
@@ -482,32 +496,15 @@
             }
 
             create() {
-                console.log('🏠 八方旅人风格主场景加载');
+                console.log('🏠 主场景加载');
                 
-                // 八方旅人米黄色背景
-                this.add.rectangle(512, 384, 1024, 768, 0xFFF8DC);
+                this.add.rectangle(400, 300, 800, 600, 0x2c3e50);
                 
-                // 木质地板
-                const floor = this.add.rectangle(512, 650, 900, 200, 0xDEB887);
-                floor.setStrokeStyle(4, 0x8B4513);
-                
-                // 标题
-                this.add.text(512, 50, '402 虚拟生活社区', {
-                    fontSize: '42px',
-                    fill: '#5D4037',
-                    fontStyle: 'bold',
-                    fontFamily: 'Georgia, serif',
-                    stroke: '#3E2723',
-                    strokeThickness: 3
+                this.add.text(400, 30, '402 虚拟生活社区系统', {
+                    fontSize: '32px',
+                    fill: '#fff',
+                    fontStyle: 'bold'
                 }).setOrigin(0.5);
-                
-                // 副标题
-                this.add.text(512, 90, '八方旅人风格', {
-                    fontSize: '20px',
-                    fill: '#8B4513',
-                    fontStyle: 'italic',
-                    fontFamily: 'Georgia, serif'
-                }).set-origin(0.5);
                 
                 this.characters = this.physics.add.group();
                 this.loadCharacters();
@@ -524,17 +521,17 @@
                     
                     console.log('📋 加载成员:', members);
                     
-                    members.forEach((member, index) => {
-                        // HD-2D 风格：更大的角色，更分散的布局
-                        const x = 200 + (index % 3) * 300;
-                        const y = 300 + Math.floor(index / 3) * 200;
-                        
-                        const char = new Character(this, x, y, member);
-                        char.setScale(2.0);  // HD-2D：放大到 128x128
-                        this.characters.add(char);
-                    });
+                members.forEach((member, index) => {
+                    const x = 200 + (index % 3) * 250;
+                    const y = 250 + Math.floor(index / 3) * 300;
                     
-                    console.log(`✅ 创建了 ${members.length} 个 HD-2D 角色`);
+                    const char = new Character(this, x, y, member);
+                    // HD-2D 风格：放大显示（从 64x64 缩放到 128x128）
+                    char.setScale(2.0);
+                    this.characters.add(char);
+                });
+                    
+                    console.log(`✅ 创建了 ${members.length} 个角色`);
                 } catch (error) {
                     console.error('❌ 加载成员失败:', error);
                     this.showError('无法加载成员数据');
@@ -542,56 +539,49 @@
             }
 
             createUI() {
-                const buttons = [
-                    { text: '🎵 音乐', y: 50, action: () => this.showNotification('音乐播放器（开发中）') },
-                    { text: '💬 聊天', y: 100, action: () => this.showNotification('聊天室（开发中）') },
-                    { text: '🌳 树洞', y: 150, action: () => this.showNotification('树洞（开发中）') }
-                ];
-                
-                buttons.forEach(btn => {
-                    const button = this.add.rectangle(900, btn.y, 100, 40, btn.y === 50 ? '#4CAF50' : btn.y === 100 ? '#2196F3' : '#FF9800');
-                    button.setStrokeStyle(2, 0x8B4513);
-                    button.setInteractive();
-                    
-                    const buttonText = this.add.text(900, btn.y, btn.text, {
-                        fontSize: '16px',
-                        fill: '#FFF8DC',
-                        fontFamily: 'Georgia, serif',
-                        fontStyle: 'bold'
-                    });
-                    buttonText.setOrigin(0.5);
-                    
-                    button.on('pointerdown', btn.action);
-                    button.on('pointerover', () => {
-                        this.tweens.add({
-                            targets: button,
-                            scaleX: 1.05,
-                            duration: 100
-                        });
-                    });
-                    button.on('pointerout', () => {
-                        button.setScale(1);
-                    });
+                const musicBtn = this.add.text(700, 50, '🎵 音乐', {
+                    fontSize: '16px',
+                    backgroundColor: '#4CAF50',
+                    padding: { x: 10, y: 5 },
+                    color: '#fff'
                 });
+                musicBtn.setInteractive();
+                musicBtn.on('pointerdown', () => this.showNotification('音乐播放器（开发中）'));
+                
+                const chatBtn = this.add.text(700, 100, '💬 聊天', {
+                    fontSize: '16px',
+                    backgroundColor: '#2196F3',
+                    padding: { x: 10, y: 5 },
+                    color: '#fff'
+                });
+                chatBtn.setInteractive();
+                chatBtn.on('pointerdown', () => this.showNotification('聊天室（开发中）'));
+                
+                const treeHoleBtn = this.add.text(700, 150, '🌳 树洞', {
+                    fontSize: '16px',
+                    backgroundColor: '#FF9800',
+                    padding: { x: 10, y: 5 },
+                    color: '#fff'
+                });
+                treeHoleBtn.setInteractive();
+                treeHoleBtn.on('pointerdown', () => this.showNotification('树洞（开发中）'));
                 
                 console.log('✅ UI 创建完成');
             }
 
             showNotification(message) {
-                const notification = this.add.text(512, 700, message, {
-                    fontSize: '18px',
-                    fill: '#5D4037',
-                    backgroundColor: 'rgba(255,248,220, 0.95)',
-                    padding: { x: 20, y: 10 },
-                    fontFamily: 'Georgia, serif',
-                    stroke: '#8B4513',
-                    strokeThickness: 2
+                const notification = this.add.text(400, 550, message, {
+                    fontSize: '16px',
+                    backgroundColor: '#000',
+                    color: '#fff',
+                    padding: { x: 20, y: 10 }
                 });
                 notification.setOrigin(0.5);
                 
                 this.tweens.add({
                     targets: notification,
                     alpha: 0,
+                    y: 500,
                     duration: 2000,
                     delay: 2000,
                     onComplete: () => notification.destroy()
@@ -599,16 +589,13 @@
             }
 
             showWelcomeMessage() {
-                const welcome = this.add.text(512, 400, '欢迎来到 402 虚拟生活社区系统！\n\n🎨 八方旅人风格已启用\n\n✨ 6 位伙伴已就位\n\n试试点击角色进行互动', {
-                    fontSize: '22px',
-                    fill: '#5D4037',
-                    backgroundColor: 'rgba(255,248,220, 0.9)',
-                    padding: { x: 30, y: 25 },
+                const welcome = this.add.text(400, 300, '欢迎来到 402 虚拟生活社区系统！\n\nPhaser 3 引擎已启动\n像素风角色系统就绪\n\n试试点击角色进行互动', {
+                    fontSize: '18px',
+                    fill: '#fff',
+                    backgroundColor: 'rgba(0,0,0,0.7)',
+                    padding: { x: 30, y: 20 },
                     align: 'center',
-                    lineSpacing: 10,
-                    fontFamily: 'Georgia, serif',
-                    stroke: '#8B4513',
-                    strokeThickness: 3
+                    lineSpacing: 8
                 });
                 welcome.setOrigin(0.5);
                 
@@ -616,37 +603,34 @@
                     targets: welcome,
                     alpha: 0,
                     duration: 1000,
-                    delay: 6000,
+                    delay: 5000,
                     onComplete: () => welcome.destroy()
                 });
             }
 
             showError(message) {
-                const error = this.add.text(512, 384, `❌ ${message}`, {
-                    fontSize: '24px',
-                    fill: '#C62828',
-                    backgroundColor: 'rgba(255,248,220, 0.95)',
-                    padding: { x: 20, y: 10 },
-                    fontFamily: 'Georgia, serif',
-                    stroke: '#8B4513',
-                    strokeThickness: 2
+                const error = this.add.text(400, 300, `❌ ${message}`, {
+                    fontSize: '20px',
+                    fill: '#ff0000',
+                    backgroundColor: 'rgba(0,0,0,0.8)',
+                    padding: { x: 20, y: 10 }
                 });
                 error.setOrigin(0.5);
                 this.time.delayedCall(3000, () => error.destroy());
             }
         }
 
-        // 配置
+        // Phaser 配置
         const config = {
             type: Phaser.AUTO,
-            width: 1024,
+            width: 1024,  // 扩大画布
             height: 768,
             parent: 'game-container',
-            backgroundColor: '#FFF8DC',
-            pixelArt: false,  // HD-2D 风格
-            roundPixels: false,
-            antialias: true,
-            antialiasGL: true,
+            backgroundColor: '#FFF8DC',  // 八方旅人米黄色背景
+            pixelArt: false,  // 关闭像素风！使用 HD-2D
+            roundPixels: false,  // 关闭像素圆角
+            antialias: true,  // 开启抗锯齿
+            antialiasGL: true,  // WebGL 抗锯齿
             physics: {
                 default: 'arcade',
                 arcade: {
@@ -659,18 +643,18 @@
                 mode: Phaser.Scale.FIT,
                 autoCenter: Phaser.Scale.CENTER_BOTH
             },
-            renderer: Phaser.WEBGL
+            renderer: Phaser.WEBGL  // 使用 WebGL 渲染器
         };
 
         // 启动游戏
         window.addEventListener('load', () => {
             try {
                 const game = new Phaser.Game(config);
-                console.log('✅ 八方旅人风格游戏启动成功');
+                console.log('✅ Phaser 游戏启动成功');
             } catch (error) {
-                console.error('❌ 游戏启动失败:', error);
+                console.error('❌ Phaser 启动失败:', error);
                 document.getElementById('game-container').innerHTML = `
-                    <div style="color: #FFF8DC; text-align: center; padding: 50px; font-family: Georgia, serif;">
+                    <div style="color: white; text-align: center; padding: 50px;">
                         <h2>❌ 游戏启动失败</h2>
                         <p>${error.message}</p>
                     </div>
