@@ -43,10 +43,34 @@
 <body>
     <div id="game-container">
         <div id="loading">⏳ 正在加载 402 虚拟生活社区系统...</div>
+        <div id="error-message" style="display: none; color: #ff6b6b; text-align: center; padding: 20px; font-family: Georgia, serif;">
+            <h2>⚠️ 加载失败</h2>
+            <p>请检查网络连接或刷新页面</p>
+            <button onclick="location.reload()" style="padding: 10px 20px; font-size: 16px;">🔄 重新加载</button>
+        </div>
     </div>
     
-    <!-- 使用 UMD 版本的 Phaser -->
-    <script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script>
+    <!-- 加载超时检测 -->
+    <script>
+        // 10秒后显示错误信息
+        setTimeout(() => {
+            const loading = document.getElementById('loading');
+            const errorDiv = document.getElementById('error-message');
+            if (loading && loading.style.display !== 'none') {
+                loading.style.display = 'none';
+                errorDiv.style.display = 'block';
+            }
+        }, 10000);
+    </script>
+    
+    <!-- 使用多个 CDN 源，提高加载成功率 -->
+    <script src="https://unpkg.com/phaser@3.90.0/dist/phaser.min.js"></script>
+    <script>
+        // 如果 unpkg 加载失败，回退到 cdnjs
+    </script>
+    <script>
+        window.Phaser || document.write('<script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"><\/script>');
+    </script>
     
     <script>
         // Boot 场景
@@ -657,7 +681,9 @@
             scene: [Boot, Home],
             scale: {
                 mode: Phaser.Scale.FIT,
-                autoCenter: Phaser.Scale.CENTER_BOTH
+                autoCenter: Phaser.Scale.CENTER_BOTH,
+                width: 1024,
+                height: 768
             },
             renderer: Phaser.WEBGL
         };
