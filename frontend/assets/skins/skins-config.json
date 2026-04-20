@@ -1,0 +1,43 @@
+{
+  "skins": [
+    {
+      "id": "default",
+      "name": "默认套装",
+      "description": "初始像素风角色",
+      "characters": {
+        "chu": "assets/skins/characters/初.png",
+        "bo": "assets/skins/characters/博.png",
+        "hao": "assets/skins/characters/昊.png",
+        "zhu": "assets/skins/characters/竹.png",
+        "dong": "assets/skins/characters/东.png",
+        "qian": "assets/skins/characters/千.png"
+      }
+    },
+    {
+      "id": "christmas",
+      "name": "圣诞套装",
+      "description": "圣诞节主题皮肤",
+      "characters": {
+        "chu": "assets/skins/christmas/初.png",
+        "bo": "assets/skins/christmas/博.png",
+        "hao": "assets/skins/christmas/昊.png",
+        "zhu": "assets/skins/christmas/竹.png",
+        "dong": "assets/skins/christmas/东.png",
+        "qian": "assets/skins/christmas/千.png"
+      }
+    },
+    {
+      "id": "halloween",
+      "name": "万圣节套装",
+      "description": "万圣节主题皮肤",
+      "characters": {
+        "chu": "assets/skins/halloween/初.png",
+        "bo": "assets/skins/halloween/博.png",
+        "hao": "assets/skins/halloween/昊.png",
+        "zhu": "assets/skins/halloween/竹.png",
+        "dong": "assets/skins/halloween/东.png",
+        "qian": "assets/skins/halloween/千.png"
+      }
+    }
+  ]
+}

@@ -1,0 +1,68 @@
+{
+  "chu": {
+    "name": "初",
+    "gender": "male",
+    "color": "#FF6B6B",
+    "style": "energetic",
+    "features": {
+      "hair": "red spiky",
+      "clothes": "casual t-shirt",
+      "accessory": "headphones"
+    }
+  },
+  "bo": {
+    "name": "博",
+    "gender": "male",
+    "color": "#4ECDC4",
+    "style": "cool",
+    "features": {
+      "hair": "cyan short",
+      "clothes": "hoodie",
+      "accessory": "glasses"
+    }
+  },
+  "hao": {
+    "name": "昊",
+    "gender": "male",
+    "color": "#FFE66D",
+    "style": "friendly",
+    "features": {
+      "hair": "blonde messy",
+      "clothes": "t-shirt jeans",
+      "accessory": "watch"
+    }
+  },
+  "zhu": {
+    "name": "竹",
+    "gender": "female",
+    "color": "#95E1D3",
+    "style": "gentle",
+    "features": {
+      "hair": "light green long",
+      "clothes": "dress",
+      "accessory": "ribbon"
+    }
+  },
+  "dong": {
+    "name": "东",
+    "gender": "female",
+    "color": "#F38181",
+    "style": "cute",
+    "features": {
+      "hair": "pink twin tails",
+      "clothes": "cute outfit",
+      "accessory": "hair clip"
+    }
+  },
+  "qian": {
+    "name": "千",
+    "gender": "female",
+    "color": "#AA96DA",
+    "style": "mysterious",
+    "features": {
+      "hair": "purple long",
+      "clothes": "modern",
+      "accessory": "earrings"
+    }
+  }
+}
