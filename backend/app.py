@@ -12,12 +12,13 @@ load_dotenv()
 
 # 创建 Flask 应用
 app = Flask(__name__, 
-            static_folder='../frontend',
+            static_folder='frontend',
             static_url_path='')
 
 # 配置
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production')
 app.config['JSON_AS_ASCII'] = False
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
 # 启用 CORS
 CORS(app)
@@ -37,8 +38,18 @@ init_identify_routes(app)
 # 静态文件服务
 @app.route('/')
 def index():
-    """主页面"""
-    return send_from_directory('../frontend', 'index.html')
+    """Phaser 游戏主页面"""
+    return send_from_directory('frontend', 'index.html')
+
+@app.route('/<path:path>')
+def static_files(path):
+    """静态文件服务"""
+    return send_from_directory('frontend', path)
+
+@app.route('/scripts/<path:path>')
+def scripts_files(path):
+    """JavaScript 模块支持"""
+    return send_from_directory('frontend/scripts', path)
 
 @app.route('/health')
 def health():
