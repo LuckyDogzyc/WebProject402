@@ -115,12 +115,12 @@
                 };
                 
                 members.forEach(member => {
-                    this.load.image(member, charFiles[member]);
+                    // 只加载 spritesheet，避免 key 冲突
                     this.load.spritesheet(member, charFiles[member], {
-                        frameWidth: 256,  // HD-2D: 256x256
+                        frameWidth: 256,
                         frameHeight: 256
                     });
-                    console.log(`✅ 加载 HD-2D 角色: ${member} (${charFiles[member]})`);
+                    console.log(`✅ 加载 HD-2D 角色: ${member}`);
                 });
             }
 
