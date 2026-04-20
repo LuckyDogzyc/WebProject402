@@ -11,8 +11,13 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # 创建 Flask 应用
+# 注意：static_folder 路径相对于 backend/ 目录
+import os
+backend_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.dirname(backend_dir)
+
 app = Flask(__name__, 
-            static_folder='frontend',
+            static_folder=os.path.join(project_root, 'frontend'),
             static_url_path='')
 
 # 配置
@@ -27,7 +32,7 @@ CORS(app)
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
 
 # 加载配置
-config_path = os.path.join(os.path.dirname(__file__), '..', 'config', 'config.json')
+config_path = os.path.join(project_root, 'config', 'config.json')
 with open(config_path, 'r', encoding='utf-8') as f:
     config = json.load(f)
 
@@ -39,17 +44,17 @@ init_identify_routes(app)
 @app.route('/')
 def index():
     """Phaser 游戏主页面"""
-    return send_from_directory('frontend', 'index.html')
+    return send_from_directory(os.path.join(project_root, 'frontend'), 'index.html')
 
 @app.route('/<path:path>')
 def static_files(path):
     """静态文件服务"""
-    return send_from_directory('frontend', path)
+    return send_from_directory(os.path.join(project_root, 'frontend'), path)
 
 @app.route('/scripts/<path:path>')
 def scripts_files(path):
     """JavaScript 模块支持"""
-    return send_from_directory('frontend/scripts', path)
+    return send_from_directory(os.path.join(project_root, 'frontend/scripts'), path)
 
 @app.route('/health')
 def health():
