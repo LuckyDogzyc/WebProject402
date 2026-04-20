@@ -1,4 +1,4 @@
-import Phaser from '../node_modules/phaser/dist/phaser.esm.js';
+import * as Phaser from '../node_modules/phaser/dist/phaser.esm.js';
 import Boot from './scenes/Boot.js';
 import Home from './scenes/Home.js';
 
