@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>402 欢迎界面</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <main class="shell">
+    <header class="hero">
+      <p class="badge">ROOM 402</p>
+      <h1>欢迎来到 402 小队</h1>
+      <p class="subtitle">在这里，每位成员都有自己的名卡位置。</p>
+    </header>
+
+    <section aria-label="402 成员名卡" class="card-grid" id="cardGrid"></section>
+
+    <footer class="footnote">
+      <p>只读静态页 · 端口 8101</p>
+    </footer>
+  </main>
+
+  <template id="cardTemplate">
+    <article class="member-card">
+      <span class="member-index"></span>
+      <h2 class="member-name"></h2>
+      <p class="member-role"></p>
+      <p class="member-note"></p>
+    </article>
+  </template>
+
+  <script src="./script.js"></script>
+</body>
+</html>
