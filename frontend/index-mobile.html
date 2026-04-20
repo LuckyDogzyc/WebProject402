@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>402 虚拟生活社区系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #FFF8DC;
+            font-family: 'Georgia', 'Times New Roman', serif;
+            color: #5D4037;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1024px;
+            margin: 0 auto;
+        }
+        
+        .title {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .title h1 {
+            font-size: 36px;
+            color: #8B4513;
+            text-shadow: 2px 2px 0 rgba(139, 69, 19, 0.3);
+            margin-bottom: 10px;
+        }
+        
+        .title p {
+            font-size: 18px;
+            color: #6B8E23;
+            font-style: italic;
+        }
+        
+        .characters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .character-card {
+            background: #FFFAF0;
+            border: 4px solid #8B4513;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 8px 20px rgba(139, 69, 19, 0.3);
+            transition: transform 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .character-card:active {
+            transform: scale(0.98);
+        }
+        
+        .character-avatar {
+            width: 128px;
+            height: 128px;
+            margin: 0 auto 15px;
+            border-radius: 8px;
+            border: 3px solid #8B4513;
+            object-fit: cover;
+            display: block;
+        }
+        
+        .character-name {
+            font-size: 24px;
+            color: #8B4513;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .character-action {
+            margin-top: 15px;
+            padding: 10px 20px;
+            background: #8B4513;
+            color: #FFF8DC;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            font-family: 'Georgia', serif;
+            transition: background 0.2s;
+        }
+        
+        .character-action:active {
+            background: #6B8E23;
+        }
+        
+        .action-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: #FFF8DC;
+            border: 3px solid #8B4513;
+            border-radius: 0 0 12px 12px;
+            padding: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            z-index: 100;
+        }
+        
+        .action-menu.show {
+            display: block;
+        }
+        
+        .action-title {
+            font-size: 18px;
+            color: #8B4513;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .action-buttons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        
+        .action-btn {
+            padding: 12px;
+            background: #8B4513;
+            color: #FFF8DC;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            font-family: 'Georgia, serif';
+            transition: background 0.2s;
+        }
+        
+        .action-btn:active {
+            background: #6B8E23;
+        }
+        
+        .close-btn {
+            background: #C0392B;
+            grid-column: 1 / -1;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(139, 69, 19, 0.95);
+            color: #FFF8DC;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-family: 'Georgia, serif;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .notification.hide {
+            animation: fadeOut 2s forwards;
+        }
+        
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                top: 0;
+            }
+        }
+        
+        /* 移动端优化 */
+        @media (max-width: 768px) {
+            .characters-grid {
+                grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+                gap: 15px;
+            }
+            
+            .character-avatar {
+                width: 100px;
+                height: 100px;
+            }
+            
+            .character-name {
+                font-size: 20px;
+            }
+            
+            .action-buttons {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="title">
+            <h1>402 虚拟生活社区系统</h1>
+            <p>八方旅人风格 · 六人小队</p>
+        </div>
+        
+        <div class="characters-grid" id="charactersGrid"></div>
+        
+        <div class="title">
+            <p style="font-size: 14px; color: #8B4513;">
+                © 2026 402 小队 · 八方旅人风格 HD-2D
+            </p>
+        </div>
+    </div>
+    
+    <div id="notification" class="notification hide"></div>
+    
+    <script>
+        // 角色数据
+        const characters = [
+            {
+                id: 'chu',
+                name: '初',
+                role: '战士',
+                avatar: 'assets/skins/characters/初.png',
+                color: '#E74C3C',
+                description: '热血战士，红色头发，佩戴耳机'
+            },
+            {
+                id: 'bo',
+                name: '博',
+                role: '学者',
+                avatar: 'assets/skins/characters/博.png',
+                color: '#3498DB',
+                description: '冷静学者，青色短发，金丝眼镜'
+            },
+            {
+                id: 'hao',
+                name: '昊',
+                role: '商人',
+                avatar: 'assets/skins/characters/昊.png',
+                color: '#F39C12',
+                description: '开朗商人，金色乱发，携带钱袋'
+            },
+            {
+                id: 'zhu',
+                name: '竹',
+                role: '舞者',
+                avatar: 'assets/skins/characters/竹.png',
+                color: '#90EE90',
+                description: '优雅舞者，浅绿长发，手持竖琴'
+            },
+            {
+                id: 'dong',
+                name: '东',
+                role: '神官',
+                avatar: 'assets/skins/characters/东.png',
+                color: '#FF69B4',
+                description: '可爱神官，粉色双马尾，手持权杖'
+            },
+            {
+                id: 'qian',
+                name: '千',
+                role: '魔法师',
+                avatar: 'assets/skins/characters/千.png',
+                color: '#9B59B6',
+                description: '神秘魔法师，紫色长发，魔法环绕'
+            }
+        ];
+        
+        // 加载角色到页面
+        function loadCharacters() {
+            const grid = document.getElementById('charactersGrid');
+            
+            characters.forEach((char, index) => {
+                const card = document.createElement('div');
+                card.className = 'character-card';
+                
+                // 点击事件
+                card.onclick = () => showActionMenu(char);
+                
+                // 触觉反馈
+                card.addEventListener('touchstart', () => {
+                    card.style.transform = 'scale(0.95)';
+                });
+                card.addEventListener('touchend', () => {
+                    card.style.transform = 'scale(1)';
+                });
+                
+                card.innerHTML = `
+                    <img src="${char.avatar}" alt="${char.name}" class="character-avatar" onerror="this.src='data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect width='100' height='100' fill='%23FFF8DC'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3c.2em'%3E${char.name[0]}/%3C/text%3E/svg%3E">
+                    <div class="character-name">${char.name}</div>
+                    <div style="font-size: 14px; color: #8B4513; margin-bottom: 3px;">${char.role}</div>
+                    <div class="character-action" data-char="${char.id}">
+                        🎯 动作
+                    </div>
+                `;
+                
+                grid.appendChild(card);
+            });
+            
+            // 绑定动作按钮事件
+            document.querySelectorAll('.character-action').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const charId = btn.dataset.char;
+                    const char = characters.find(c => c.id === charId);
+                    showActionMenu(char);
+                });
+            });
+        }
+        
+        // 显示动作菜单
+        function showActionMenu(character) {
+            // 隐藏之前的菜单
+            const existingMenu = document.querySelector('.action-menu.show');
+            if (existingMenu) {
+                existingMenu.classList.remove('show');
+            }
+            
+            // 创建新菜单
+            const menu = document.createElement('div');
+            menu.className = 'action-menu show';
+            menu.innerHTML = `
+                <div class="action-title">${character.name} 的动作</div>
+                <div class="action-buttons">
+                    <button class="action-btn" onclick="doAction('${character.id}', 'drink')">🍹 调酒</button>
+                    <button class="action-btn" onclick="doAction('${character.id}', 'drunk')">🍺 灌醉</button>
+                    <button class="action-btn" onclick="doAction('${character.id}', 'rest')">😴 休息</button>
+                    <button class="action-btn" onclick="doAction('${character.id}', 'sing')">🎵 唱歌</button>
+                    <button class="action-btn" onclick="doAction('${character.id}', 'dance')">💃 跳舞</button>
+                    <button class="action-btn" onclick="closeMenu()">❌ 关闭</button>
+                </div>
+            `;
+            
+            document.body.appendChild(menu);
+            
+            // 点击外部关闭
+            setTimeout(() => closeMenu(), 8000);
+        }
+        
+        // 执行动作
+        function doAction(charId, action) {
+            const char = characters.find(c => c.id === charId);
+            
+            switch(action) {
+                case 'drink':
+                    showNotification(`🍹 ${char.name} 正在调酒...`);
+                    break;
+                case 'drunk':
+                    showNotification(`🥴 ${char.name} 被灌醉了！`);
+                    break;
+                case 'rest':
+                    showNotification(`😴 ${char.name} 正在休息...`);
+                    break;
+                case 'sing':
+                    showNotification(`🎵 ${char.name} 正在唱歌...`);
+                    break;
+                case 'dance':
+                    showNotification(`💃 ${char.name} 正在跳舞...`);
+                    break;
+            }
+            
+            closeMenu();
+        }
+        
+        // 关闭菜单
+        function closeMenu() {
+            const menu = document.querySelector('.action-menu.show');
+            if (menu) {
+                menu.classList.remove('show');
+                setTimeout(() => menu.remove(), 300);
+            }
+        }
+        
+        // 显示通知
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.classList.remove('hide');
+            
+            setTimeout(() => {
+                notification.classList.add('hide');
+            }, 3000);
+        }
+        
+        // 页面加载完成后初始化
+        window.addEventListener('DOMContentLoaded', () => {
+            console.log('🏠 八方旅人风格页面加载');
+            loadCharacters();
+            
+            // 欢迎消息
+            setTimeout(() => {
+                showNotification('🎉 欢迎来到 402 虚拟生活社区！');
+            }, 1000);
+        });
+        
+        // 错误处理
+        window.addEventListener('error', (e) => {
+            console.error('❌ 页面错误:', e);
+            const loading = document.getElementById('loading');
+            if (loading) {
+                loading.innerHTML = '⚠️ 页面加载失败<br><small>请刷新重试</small>';
+            }
+        });
+        
+        // 检测是否加载完成
+        setTimeout(() => {
+            const loading = document.getElementById('loading');
+            const grid = document.getElementById('charactersGrid');
+            
+            if (loading && grid && grid.children.length === 0) {
+                // 加载失败，显示简化版角色列表
+                console.log('⚠️ Phaser 加载失败，使用简化版');
+                loading.style.display = 'none';
+                loadCharacters();
+            } else if (loading) {
+                loading.style.display = 'none';
+            }
+        }, 5000);
+    </script>
+</body>
+</html>
