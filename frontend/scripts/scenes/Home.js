@@ -1,3 +1,4 @@
+// Home.js - 主场景
 import Character from '../objects/Character.js';
 
 export default class Home extends Phaser.Scene {
@@ -64,9 +65,7 @@ export default class Home extends Phaser.Scene {
             color: '#fff'
         });
         musicBtn.setInteractive();
-        musicBtn.on('pointerdown', () => {
-            this.toggleMusic();
-        });
+        musicBtn.on('pointerdown', () => this.showNotification('音乐播放器（开发中）'));
         
         // 聊天按钮
         const chatBtn = this.add.text(700, 100, '💬 聊天', {
@@ -76,9 +75,7 @@ export default class Home extends Phaser.Scene {
             color: '#fff'
         });
         chatBtn.setInteractive();
-        chatBtn.on('pointerdown', () => {
-            this.openChat();
-        });
+        chatBtn.on('pointerdown', () => this.showNotification('聊天室（开发中）'));
         
         // 树洞按钮
         const treeHoleBtn = this.add.text(700, 150, '🌳 树洞', {
@@ -88,40 +85,18 @@ export default class Home extends Phaser.Scene {
             color: '#fff'
         });
         treeHoleBtn.setInteractive();
-        treeHoleBtn.on('pointerdown', () => {
-            this.openTreeHole();
-        });
+        treeHoleBtn.on('pointerdown', () => this.showNotification('树洞（开发中）'));
         
         console.log('✅ UI 创建完成');
     }
 
-    toggleMusic() {
-        console.log('🎵 切换音乐');
-        this.showNotification('音乐播放器（开发中）');
-    }
-
-    openChat() {
-        console.log('💬 打开聊天室');
-        this.showNotification('聊天室（开发中）');
-    }
-
-    openTreeHole() {
-        console.log('🌳 打开树洞');
-        this.showNotification('树洞（开发中）');
-    }
-
     showNotification(message) {
-        const notification = this.add.text(
-            400,
-            550,
-            message,
-            {
-                fontSize: '16px',
-                backgroundColor: '#000',
-                color: '#fff',
-                padding: { x: 20, y: 10 }
-            }
-        );
+        const notification = this.add.text(400, 550, message, {
+            fontSize: '16px',
+            backgroundColor: '#000',
+            color: '#fff',
+            padding: { x: 20, y: 10 }
+        });
         notification.setOrigin(0.5);
         
         this.tweens.add({
@@ -135,44 +110,34 @@ export default class Home extends Phaser.Scene {
     }
 
     showWelcomeMessage() {
-        const welcome = this.add.text(
-            400,
-            300,
-            '欢迎来到 402 虚拟生活社区系统！\n\nPhaser 3 引擎已启动\n像素风角色系统就绪',
-            {
-                fontSize: '20px',
-                fill: '#fff',
-                backgroundColor: 'rgba(0,0,0,0.7)',
-                padding: { x: 30, y: 20 },
-                align: 'center'
-            }
-        );
+        const welcome = this.add.text(400, 300, '欢迎来到 402 虚拟生活社区系统！\n\nPhaser 3 引擎已启动\n像素风角色系统就绪\n\n试试点击角色进行互动', {
+            fontSize: '18px',
+            fill: '#fff',
+            backgroundColor: 'rgba(0,0,0,0.7)',
+            padding: { x: 30, y: 20 },
+            align: 'center',
+            lineSpacing: 8
+        });
         welcome.setOrigin(0.5);
         
-        // 3 秒后淡出
+        // 5 秒后淡出
         this.tweens.add({
             targets: welcome,
             alpha: 0,
             duration: 1000,
-            delay: 3000,
+            delay: 5000,
             onComplete: () => welcome.destroy()
         });
     }
 
     showError(message) {
-        const error = this.add.text(
-            400,
-            300,
-            `❌ ${message}`,
-            {
-                fontSize: '20px',
-                fill: '#ff0000',
-                backgroundColor: 'rgba(0,0,0,0.8)',
-                padding: { x: 20, y: 10 }
-            }
-        );
+        const error = this.add.text(400, 300, `❌ ${message}`, {
+            fontSize: '20px',
+            fill: '#ff0000',
+            backgroundColor: 'rgba(0,0,0,0.8)',
+            padding: { x: 20, y: 10 }
+        });
         error.setOrigin(0.5);
-        
         this.time.delayedCall(3000, () => error.destroy());
     }
 }

@@ -1,3 +1,4 @@
+// Character.js - 角色类
 export default class Character extends Phaser.Physics.Arcade.Sprite {
     constructor(scene, x, y, memberData) {
         super(scene, x, y, memberData.id);
@@ -118,42 +119,23 @@ export default class Character extends Phaser.Physics.Arcade.Sprite {
         });
         
         // 点击外部关闭
-        const closeHandler = () => {
-            menu.destroy();
-            scene.input.off('pointerdown', closeHandler);
-        };
-        
-        scene.time.delayedCall(5000, closeHandler);
+        scene.time.delayedCall(5000, () => menu.destroy());
     }
 
-    async makeDrink() {
+    makeDrink() {
         console.log(`🍺 ${this.characterName} 正在调酒`);
-        
-        // 播放工作动画
         this.play(`${this.characterId}_work`);
-        
-        // 显示效果
         this.showEffect('🍹 调酒中...');
-        
-        // 3秒后恢复
         this.scene.time.delayedCall(3000, () => {
             this.play(`${this.characterId}_idle`);
         });
     }
 
-    async getDrunk() {
+    getDrunk() {
         console.log(`🥴 ${this.characterName} 被灌醉了`);
-        
-        // 播放醉酒动画
         this.play(`${this.characterId}_drunk`);
-        
-        // 显示效果
         this.showEffect('🥴 醉酒了！');
-        
-        // 更新状态
         this.currentState = 'drunk';
-        
-        // 10秒后恢复
         this.scene.time.delayedCall(10000, () => {
             this.play(`${this.characterId}_idle`);
             this.currentState = 'idle';
@@ -163,43 +145,27 @@ export default class Character extends Phaser.Physics.Arcade.Sprite {
 
     showInfo() {
         const scene = this.scene;
+        const infoText = `👤 名称: ${this.characterName}\n🎭 ID: ${this.characterId}\n❤️ 状态: ${this.currentState}`;
         
-        const infoText = `
-        👤 名称: ${this.characterName}
-        🎭 ID: ${this.characterId}
-        ❤️ 状态: ${this.currentState}
-        `.trim();
-        
-        const info = scene.add.text(
-            this.x,
-            this.y - 150,
-            infoText,
-            {
-                fontSize: '12px',
-                fill: '#000',
-                backgroundColor: '#fff',
-                padding: { x: 10, y: 10 },
-                lineSpacing: 5
-            }
-        );
+        const info = scene.add.text(this.x, this.y - 150, infoText, {
+            fontSize: '12px',
+            fill: '#000',
+            backgroundColor: '#fff',
+            padding: { x: 10, y: 10 },
+            lineSpacing: 5
+        });
         info.setOrigin(0.5);
-        
         scene.time.delayedCall(4000, () => info.destroy());
     }
 
     showEffect(text) {
         const scene = this.scene;
-        const effectText = scene.add.text(
-            this.x,
-            this.y - 50,
-            text,
-            {
-                fontSize: '14px',
-                fill: '#fff',
-                backgroundColor: '#000',
-                padding: { x: 8, y: 4 }
-            }
-        );
+        const effectText = scene.add.text(this.x, this.y - 50, text, {
+            fontSize: '14px',
+            fill: '#fff',
+            backgroundColor: '#000',
+            padding: { x: 8, y: 4 }
+        });
         effectText.setOrigin(0.5);
         
         scene.tweens.add({

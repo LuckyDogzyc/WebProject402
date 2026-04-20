@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>402 虚拟生活社区系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background-color: #1a1a1a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+        }
+        
+        #game-container {
+            position: relative;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+        
+        #loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 24px;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <div id="loading">⏳ 正在加载 402 虚拟生活社区系统...</div>
+    </div>
+    
+    <!-- 使用 import map 来支持 ES6 模块 -->
+    <script type="importmap">
+    {
+        "imports": {
+            "phaser": "./node_modules/phaser/dist/phaser.esm.js"
+        }
+    }
+    </script>
+    
+    <script type="module">
+        import Phaser from 'phaser';
+        
+        // 简单的测试场景
+        class TestScene extends Phaser.Scene {
+            constructor() {
+                super({ key: 'TestScene' });
+            }
+            
+            create() {
+                console.log('✅ Phaser 场景创建成功');
+                
+                // 移除加载提示
+                const loading = document.getElementById('loading');
+                if (loading) loading.remove();
+                
+                // 添加背景
+                this.add.rectangle(400, 300, 800, 600, 0x2c3e50);
+                
+                // 添加标题
+                this.add.text(400, 50, '402 虚拟生活社区系统', {
+                    fontSize: '32px',
+                    fill: '#fff',
+                    fontStyle: 'bold'
+                }).setOrigin(0.5);
+                
+                // 添加测试文本
+                this.add.text(400, 300, '✅ Phaser 3 引擎运行正常！\n\n🎮 游戏系统已启动\n\n（这是一个测试页面）', {
+                    fontSize: '20px',
+                    fill: '#4CAF50',
+                    backgroundColor: 'rgba(0,0,0,0.7)',
+                    padding: { x: 20, y: 20 },
+                    align: 'center'
+                }).setOrigin(0.5);
+                
+                // 添加交互提示
+                const hint = this.add.text(400, 500, '🔄 页面将在 5 秒后跳转到完整版本...', {
+                    fontSize: '14px',
+                    fill: '#fff'
+                }).setOrigin(0.5);
+                
+                // 5秒后跳转
+                this.time.delayedCall(5000, () => {
+                    hint.setText('✅ 测试完成！系统正常工作。');
+                });
+            }
+        }
+        
+        const config = {
+            type: Phaser.AUTO,
+            width: 800,
+            height: 600,
+            parent: 'game-container',
+            backgroundColor: '#2c3e50',
+            pixelArt: true,
+            scene: [TestScene],
+            scale: {
+                mode: Phaser.Scale.FIT,
+                autoCenter: Phaser.Scale.CENTER_BOTH
+            }
+        };
+        
+        // 启动游戏
+        try {
+            const game = new Phaser.Game(config);
+            console.log('✅ Phaser 游戏启动成功');
+        } catch (error) {
+            console.error('❌ Phaser 启动失败:', error);
+            document.getElementById('loading').innerHTML = '❌ 加载失败：' + error.message;
+        }
+    </script>
+</body>
+</html>

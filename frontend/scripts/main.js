@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+import Phaser from './node_modules/phaser/dist/phaser.esm.js';
 import Boot from './scenes/Boot.js';
 import Home from './scenes/Home.js';
 
@@ -25,5 +25,17 @@ const config = {
 
 // 启动游戏
 window.addEventListener('load', () => {
-    new Phaser.Game(config);
+    try {
+        const game = new Phaser.Game(config);
+        console.log('✅ Phaser 游戏启动成功');
+    } catch (error) {
+        console.error('❌ Phaser 启动失败:', error);
+        document.getElementById('game-container').innerHTML = `
+            <div style="color: white; text-align: center; padding: 50px;">
+                <h2>❌ 游戏启动失败</h2>
+                <p>${error.message}</p>
+                <p>请查看浏览器控制台获取详细信息</p>
+            </div>
+        `;
+    }
 });

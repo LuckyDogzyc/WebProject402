@@ -1,9 +1,12 @@
+// Boot.js - 启动场景
 export default class Boot extends Phaser.Scene {
     constructor() {
         super({ key: 'Boot' });
     }
 
     preload() {
+        console.log('🔄 开始加载资源...');
+
         // 创建加载进度条
         const progressBar = this.add.graphics();
         const width = this.cameras.main.width;
@@ -22,11 +25,15 @@ export default class Boot extends Phaser.Scene {
         this.load.on('complete', () => {
             progressBar.destroy();
             progressBarBg.destroy();
+            console.log('✅ 资源加载完成');
         });
 
-        // 加载全局资源
-        // 暂时使用占位符，后续替换为实际精灵图
-        this.load.image('room', 'assets/images/room.png');
+        // 加载房间背景（占位符）
+        try {
+            this.load.image('room', 'assets/images/room.png');
+        } catch (e) {
+            console.warn('⚠️  无法加载房间背景，使用占位符');
+        }
         
         // 为每个成员创建临时占位符
         const members = ['chu', 'bo', 'hao', 'qian', 'dong', 'zhu'];
@@ -48,15 +55,17 @@ export default class Boot extends Phaser.Scene {
     }
 
     create() {
+        console.log('🎮 创建动画...');
+
         // 创建全局动画
         this.createCharacterAnimations();
         
         // 显示启动信息
         console.log('✅ Phaser 3 初始化完成');
-        console.log('✅ 资源加载完成');
         
         // 延迟 1 秒后启动主场景
         this.time.delayedCall(1000, () => {
+            console.log('🏠 启动主场景...');
             this.scene.start('Home');
         });
     }
