@@ -126,24 +126,36 @@
 
             create() {
                 console.log('🎮 创建动画...');
-                this.createCharacterAnimations();
-                console.log('✅ 八方旅人风格系统初始化完成');
-                this.time.delayedCall(1000, () => {
-                    console.log('🏠 启动主场景...');
-                    this.scene.start('Home');
-                });
+                
+                try {
+                    this.createCharacterAnimations();
+                    console.log('✅ 八方旅人风格系统初始化完成');
+                    this.time.delayedCall(1000, () => {
+                        console.log('🏠 启动主场景...');
+                        this.scene.start('Home');
+                    });
+                } catch (error) {
+                    console.error('❌ 动画创建失败:', error);
+                    // 即使动画失败，也继续启动主场景
+                    this.time.delayedCall(1000, () => {
+                        this.scene.start('Home');
+                    });
+                }
             }
 
             createCharacterAnimations() {
                 const members = ['chu', 'bo', 'hao', 'zhu', 'dong', 'qian'];
                 
                 members.forEach(member => {
-                    this.anims.create({
-                        key: `${member}_idle`,
-                        frames: [{ key: member, frame: 0 }],
-                        frameRate: 1,
-                        repeat: -1
-                    });
+                    // 检查是否已存在
+                    if (!this.anims.exists(`${member}_idle`)) {
+                        this.anims.create({
+                            key: `${member}_idle`,
+                            frames: [{ key: member, frame: 0 }],
+                            frameRate: 1,
+                            repeat: -1
+                        });
+                    }
                 });
                 
                 console.log('✅ 角色动画创建完成');
