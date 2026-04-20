@@ -69,16 +69,44 @@
                 const colors = [0xFF6B6B, 0x4ECDC4, 0xFFE66D, 0x95E1D3, 0xF38181, 0xAA96DA];
                 
                 members.forEach((member, index) => {
-                    // 创建临时纹理（32x32 单帧）
+                    // 创建更大的纹理（64x64），更清晰
                     const graphics = this.make.graphics({ x: 0, y: 0, add: false });
                     graphics.fillStyle(colors[index], 1);
-                    graphics.fillRect(0, 0, 32, 32);
-                    graphics.generateTexture(member, 32, 32);
                     
-                    // 注册为精灵图（单帧）
+                    // 绘制更精细的像素块角色
+                    const size = 64;
+                    const border = 4;
+                    
+                    // 外框（描边）
+                    graphics.lineStyle(border, 0x000000, 1);
+                    graphics.strokeRect(0, 0, size, size);
+                    
+                    // 主体（圆角矩形）
+                    graphics.fillStyle(colors[index], 1);
+                    graphics.fillCircle(size/2, size/2, size/2 - border);
+                    
+                    // 眼睛
+                    graphics.fillStyle(0xffffff, 1);
+                    graphics.fillCircle(size * 0.35, size * 0.4, 8);
+                    graphics.fillCircle(size * 0.65, size * 0.4, 8);
+                    
+                    // 眼珠
+                    graphics.fillStyle(0x000000, 1);
+                    graphics.fillCircle(size * 0.35, size * 0.4, 4);
+                    graphics.fillCircle(size * 0.65, size * 0.4, 4);
+                    
+                    // 嘴巴
+                    graphics.lineStyle(2, 0x000000, 1);
+                    graphics.beginPath();
+                    graphics.arc(size/2, size * 0.6, 10, 0, Math.PI, false);
+                    graphics.strokePath();
+                    
+                    graphics.generateTexture(member, size, size);
+                    
+                    // 注册为精灵图
                     this.load.spritesheet(member, '__PHASER_GLOBAL_TEXTURE__' + member, {
-                        frameWidth: 32,
-                        frameHeight: 32
+                        frameWidth: size,
+                        frameHeight: size
                     });
                 });
             }
@@ -188,54 +216,212 @@
 
             showInteractionMenu() {
                 const scene = this.scene;
-                const menu = scene.add.container(this.x, this.y - 80);
                 
-                const bg = scene.add.rectangle(0, 0, 180, 120, 0xffffff);
+                // 关闭之前的菜单
+                if (this.currentMenu) {
+                    this.currentMenu.destroy();
+                }
+                
+                const menu = scene.add.container(this.x, this.y - 100);
+                this.currentMenu = menu;
+                
+                // 背景
+                const bg = scene.add.rectangle(0, 0, 200, 200, 0xffffff);
                 bg.setStrokeStyle(2, 0x000000);
                 menu.add(bg);
                 
-                const title = scene.add.text(0, -40, this.characterName, {
-                    fontSize: '16px',
+                // 标题
+                const title = scene.add.text(0, -80, this.characterName, {
+                    fontSize: '18px',
                     fill: '#000',
                     fontStyle: 'bold'
                 });
                 title.setOrigin(0.5);
                 menu.add(title);
                 
+                // 按钮分组
                 const buttons = [
-                    { text: '🎯 调酒', action: () => this.makeDrink() },
-                    { text: '🍺 灌醉', action: () => this.getDrunk() },
-                    { text: 'ℹ️ 查看', action: () => this.showInfo() },
-                    { text: '❌ 关闭', action: () => menu.destroy() }
+                    // 主要按钮
+                    { 
+                        text: '🎯 动作', 
+                        action: () => this.showActionMenu(),
+                        color: '#4CAF50',
+                        y: -40
+                    },
+                    { 
+                        text: 'ℹ️ 信息', 
+                        action: () => this.showInfo(),
+                        color: '#2196F3',
+                        y: 0
+                    },
+                    { 
+                        text: '❌ 关闭', 
+                        action: () => menu.destroy(),
+                        color: '#f44336',
+                        y: 60
+                    }
                 ];
                 
-                buttons.forEach((btn, index) => {
-                    const x = -60 + (index % 2) * 120;
-                    const y = -10 + Math.floor(index / 2) * 30;
-                    
-                    const button = scene.add.text(x, y, btn.text, {
-                        fontSize: '14px',
-                        fill: '#000',
-                        backgroundColor: '#f0f0f0',
-                        padding: { x: 8, y: 4 }
+                buttons.forEach(btn => {
+                    const button = scene.add.text(0, btn.y, btn.text, {
+                        fontSize: '16px',
+                        fill: '#fff',
+                        backgroundColor: btn.color,
+                        padding: { x: 12, y: 8 }
                     });
                     button.setOrigin(0.5);
                     button.setInteractive();
                     button.on('pointerdown', btn.action);
-                    button.on('pointerover', () => button.setStyle({ backgroundColor: '#e0e0e0' }));
-                    button.on('pointerout', () => button.setStyle({ backgroundColor: '#f0f0f0' }));
+                    button.on('pointerover', () => {
+                        scene.tweens.add({
+                            targets: button,
+                            scaleX: 1.05,
+                            scaleY: 1.05,
+                            duration: 100
+                        });
+                    });
+                    button.on('pointerout', () => {
+                        button.setScale(1);
+                    });
                     menu.add(button);
                 });
                 
-                scene.time.delayedCall(5000, () => menu.destroy());
+                // 点击外部关闭
+                const closeHandler = () => {
+                    menu.destroy();
+                    this.currentMenu = null;
+                    scene.input.off('pointerdown', closeHandler);
+                };
+                
+                scene.time.delayedCall(8000, closeHandler);
+            }
+
+            showActionMenu() {
+                const scene = this.scene;
+                
+                // 关闭主菜单
+                if (this.currentMenu) {
+                    this.currentMenu.destroy();
+                }
+                
+                const actionMenu = scene.add.container(this.x, this.y - 80);
+                this.currentMenu = actionMenu;
+                
+                // 背景
+                const bg = scene.add.rectangle(0, 0, 220, 250, 0xffffff);
+                bg.setStrokeStyle(2, 0x000000);
+                actionMenu.add(bg);
+                
+                // 标题
+                const title = scene.add.text(0, -100, '选择动作', {
+                    fontSize: '18px',
+                    fill: '#000',
+                    fontStyle: 'bold'
+                });
+                title.setOrigin(0.5);
+                actionMenu.add(title);
+                
+                // 动作按钮
+                const actions = [
+                    { 
+                        text: '🍹 调酒', 
+                        emoji: '🍹',
+                        action: () => this.makeDrink(),
+                        color: '#FF9800'
+                    },
+                    { 
+                        text: '🍺 灌醉', 
+                        emoji: '🍺',
+                        action: () => this.getDrunk(),
+                        color: '#F44336'
+                    },
+                    { 
+                        text: '😴 休息', 
+                        emoji: '😴',
+                        action: () => this.rest(),
+                        color: '#9C27B0'
+                    },
+                    { 
+                        text: '🎨 换装', 
+                        emoji: '🎨',
+                        action: () => this.changeSkin(),
+                        color: '#00BCD4'
+                    },
+                    { 
+                        text: '🎵 唱歌', 
+                        emoji: '🎵',
+                        action: () => this.sing(),
+                        color: '#FFEB3B'
+                    },
+                    { 
+                        text: '💃 跳舞', 
+                        emoji: '💃',
+                        action: () => this.dance(),
+                        color: '#E91E63'
+                    },
+                    { 
+                        text: '📝 备忘', 
+                        emoji: '📝',
+                        action: () => this.setMemo(),
+                        color: '#607D8B'
+                    },
+                    { 
+                        text: '❌ 返回', 
+                        emoji: '❌',
+                        action: () => {
+                            actionMenu.destroy();
+                            this.showInteractionMenu();
+                        },
+                        color: '#9E9E9E'
+                    }
+                ];
+                
+                actions.forEach((action, index) => {
+                    const x = -80 + (index % 2) * 90;
+                    const y = -60 + Math.floor(index / 2) * 45;
+                    
+                    const button = scene.add.rectangle(x, y, 80, 35, action.color);
+                    button.setStrokeStyle(1, 0x000000);
+                    button.setInteractive();
+                    actionMenu.add(button);
+                    
+                    const buttonText = scene.add.text(x, y, `${action.emoji}\n${action.text}`, {
+                        fontSize: '11px',
+                        fill: '#fff',
+                        align: 'center',
+                        lineSpacing: 2
+                    });
+                    buttonText.setOrigin(0.5);
+                    actionMenu.add(buttonText);
+                    
+                    button.on('pointerdown', action.action);
+                    button.on('pointerover', () => {
+                        scene.tweens.add({
+                            targets: button,
+                            scaleX: 1.05,
+                            scaleY: 1.05,
+                            duration: 100
+                        });
+                    });
+                    button.on('pointerout', () => {
+                        button.setScale(1);
+                    });
+                });
+                
+                // 点击外部关闭
+                scene.time.delayedCall(10000, () => {
+                    actionMenu.destroy();
+                    this.currentMenu = null;
+                });
             }
 
             makeDrink() {
-                console.log(`🍺 ${this.characterName} 正在调酒`);
+                console.log(`🍹 ${this.characterName} 正在调酒`);
                 this.play(`${this.characterId}_work`);
                 this.showEffect('🍹 调酒中...');
                 this.scene.time.delayedCall(3000, () => {
                     this.play(`${this.characterId}_idle`);
+                    this.showEffect('✅ 调酒完成！');
                 });
             }
 
@@ -249,6 +435,47 @@
                     this.currentState = 'idle';
                     this.showEffect('😊 恢复清醒');
                 });
+            }
+
+            rest() {
+                console.log(`😴 ${this.characterName} 正在休息`);
+                this.showEffect('😴 休息中...');
+                this.scene.time.delayedCall(5000, () => {
+                    this.showEffect('⚡ 恢复活力！');
+                });
+            }
+
+            changeSkin() {
+                console.log(`🎨 ${this.characterName} 更换皮肤`);
+                this.showEffect('🎨 皮肤功能开发中...');
+            }
+
+            sing() {
+                console.log(`🎵 ${this.characterName} 正在唱歌`);
+                this.showEffect('🎵 ~啦啦啦~');
+                this.scene.tweens.add({
+                    targets: this,
+                    scale: 1.8,
+                    duration: 200,
+                    yoyo: true,
+                    repeat: 2
+                });
+            }
+
+            dance() {
+                console.log(`💃 ${this.characterName} 正在跳舞`);
+                this.showEffect('💃 跳舞中...');
+                this.scene.tweens.add({
+                    targets: this,
+                    angle: 360,
+                    duration: 1000,
+                    repeat: 2
+                });
+            }
+
+            setMemo() {
+                console.log(`📝 ${this.characterName} 设置备忘`);
+                this.showEffect('📝 备忘功能开发中...');
             }
 
             showInfo() {
@@ -323,6 +550,8 @@
                         const y = 200 + Math.floor(index / 3) * 200;
                         
                         const char = new Character(this, x, y, member);
+                        // 放大显示（从 64x64 缩放到 96x96）
+                        char.setScale(1.5);
                         this.characters.add(char);
                     });
                     
