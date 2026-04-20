@@ -29,6 +29,429 @@
 </head>
 <body>
     <div id="game-container"></div>
-    <script type="module" src="./scripts/main.js"></script>
+    
+    <!-- 使用 UMD 版本的 Phaser（更稳定） -->
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script>
+    
+    <script>
+        // Boot 场景
+        class Boot extends Phaser.Scene {
+            constructor() {
+                super({ key: 'Boot' });
+            }
+
+            preload() {
+                console.log('🔄 开始加载资源...');
+
+                // 创建加载进度条
+                const progressBar = this.add.graphics();
+                const width = this.cameras.main.width;
+                const height = this.cameras.main.height;
+                
+                const progressBarBg = this.add.graphics();
+                progressBarBg.fillStyle(0x333333, 1);
+                progressBarBg.fillRect(width / 4, height / 2 - 15, width / 2, 30);
+                
+                this.load.on('progress', (value) => {
+                    progressBar.clear();
+                    progressBar.fillStyle(0x4CAF50, 1);
+                    progressBar.fillRect(width / 4, height / 2 - 15, (width / 2) * value, 30);
+                });
+                
+                this.load.on('complete', () => {
+                    progressBar.destroy();
+                    progressBarBg.destroy();
+                    console.log('✅ 资源加载完成');
+                });
+
+                // 为每个成员创建临时占位符
+                const members = ['chu', 'bo', 'hao', 'qian', 'dong', 'zhu'];
+                const colors = [0xFF6B6B, 0x4ECDC4, 0xFFE66D, 0x95E1D3, 0xF38181, 0xAA96DA];
+                
+                members.forEach((member, index) => {
+                    // 创建临时纹理（32x32 单帧）
+                    const graphics = this.make.graphics({ x: 0, y: 0, add: false });
+                    graphics.fillStyle(colors[index], 1);
+                    graphics.fillRect(0, 0, 32, 32);
+                    graphics.generateTexture(member, 32, 32);
+                    
+                    // 注册为精灵图（单帧）
+                    this.load.spritesheet(member, '__PHASER_GLOBAL_TEXTURE__' + member, {
+                        frameWidth: 32,
+                        frameHeight: 32
+                    });
+                });
+            }
+
+            create() {
+                console.log('🎮 创建动画...');
+                this.createCharacterAnimations();
+                console.log('✅ Phaser 3 初始化完成');
+                this.time.delayedCall(1000, () => {
+                    console.log('🏠 启动主场景...');
+                    this.scene.start('Home');
+                });
+            }
+
+            createCharacterAnimations() {
+                const members = ['chu', 'bo', 'hao', 'qian', 'dong', 'zhu'];
+                
+                members.forEach(member => {
+                    this.anims.create({
+                        key: `${member}_idle`,
+                        frames: [{ key: member, frame: 0 }],
+                        frameRate: 1,
+                        repeat: -1
+                    });
+
+                    this.anims.create({
+                        key: `${member}_walk`,
+                        frames: [{ key: member, frame: 0 }],
+                        frameRate: 8,
+                        repeat: -1
+                    });
+
+                    this.anims.create({
+                        key: `${member}_work`,
+                        frames: [{ key: member, frame: 0 }],
+                        frameRate: 8,
+                        repeat: -1
+                    });
+
+                    this.anims.create({
+                        key: `${member}_drunk`,
+                        frames: [{ key: member, frame: 0 }],
+                        frameRate: 2,
+                        repeat: -1
+                    });
+                });
+                
+                console.log('✅ 角色动画创建完成');
+            }
+        }
+
+        // Character 类
+        class Character extends Phaser.Physics.Arcade.Sprite {
+            constructor(scene, x, y, memberData) {
+                super(scene, x, y, memberData.id);
+                
+                this.memberData = memberData;
+                this.characterId = memberData.id;
+                this.characterName = memberData.name;
+                this.currentState = 'idle';
+                
+                scene.physics.add.existing(this);
+                this.setCollideWorldBounds(true);
+                this.setInteractive();
+                
+                this.on('pointerdown', this.handleClick, this);
+                this.on('pointerover', this.handleHover, this);
+                this.on('pointerout', this.handleHoverOut, this);
+                
+                scene.add.existing(this);
+                this.play(`${this.characterId}_idle`);
+                this.createNameLabel();
+            }
+
+            createNameLabel() {
+                this.nameLabel = this.scene.add.text(this.x, this.y - 30, this.characterName, {
+                    fontSize: '14px',
+                    fill: '#fff',
+                    backgroundColor: 'rgba(0,0,0,0.5)',
+                    padding: { x: 5, y: 2 }
+                });
+                this.nameLabel.setOrigin(0.5);
+            }
+
+            handleClick() {
+                console.log(`👆 点击角色: ${this.characterName}`);
+                this.showInteractionMenu();
+            }
+
+            handleHover() {
+                this.scene.tweens.add({
+                    targets: this,
+                    scaleX: 1.1,
+                    scaleY: 1.1,
+                    duration: 100
+                });
+            }
+
+            handleHoverOut() {
+                this.scene.tweens.add({
+                    targets: this,
+                    scaleX: 1,
+                    scaleY: 1,
+                    duration: 100
+                });
+            }
+
+            showInteractionMenu() {
+                const scene = this.scene;
+                const menu = scene.add.container(this.x, this.y - 80);
+                
+                const bg = scene.add.rectangle(0, 0, 180, 120, 0xffffff);
+                bg.setStrokeStyle(2, 0x000000);
+                menu.add(bg);
+                
+                const title = scene.add.text(0, -40, this.characterName, {
+                    fontSize: '16px',
+                    fill: '#000',
+                    fontStyle: 'bold'
+                });
+                title.setOrigin(0.5);
+                menu.add(title);
+                
+                const buttons = [
+                    { text: '🎯 调酒', action: () => this.makeDrink() },
+                    { text: '🍺 灌醉', action: () => this.getDrunk() },
+                    { text: 'ℹ️ 查看', action: () => this.showInfo() },
+                    { text: '❌ 关闭', action: () => menu.destroy() }
+                ];
+                
+                buttons.forEach((btn, index) => {
+                    const x = -60 + (index % 2) * 120;
+                    const y = -10 + Math.floor(index / 2) * 30;
+                    
+                    const button = scene.add.text(x, y, btn.text, {
+                        fontSize: '14px',
+                        fill: '#000',
+                        backgroundColor: '#f0f0f0',
+                        padding: { x: 8, y: 4 }
+                    });
+                    button.setOrigin(0.5);
+                    button.setInteractive();
+                    button.on('pointerdown', btn.action);
+                    button.on('pointerover', () => button.setStyle({ backgroundColor: '#e0e0e0' }));
+                    button.on('pointerout', () => button.setStyle({ backgroundColor: '#f0f0f0' }));
+                    menu.add(button);
+                });
+                
+                scene.time.delayedCall(5000, () => menu.destroy());
+            }
+
+            makeDrink() {
+                console.log(`🍺 ${this.characterName} 正在调酒`);
+                this.play(`${this.characterId}_work`);
+                this.showEffect('🍹 调酒中...');
+                this.scene.time.delayedCall(3000, () => {
+                    this.play(`${this.characterId}_idle`);
+                });
+            }
+
+            getDrunk() {
+                console.log(`🥴 ${this.characterName} 被灌醉了`);
+                this.play(`${this.characterId}_drunk`);
+                this.showEffect('🥴 醉酒了！');
+                this.currentState = 'drunk';
+                this.scene.time.delayedCall(10000, () => {
+                    this.play(`${this.characterId}_idle`);
+                    this.currentState = 'idle';
+                    this.showEffect('😊 恢复清醒');
+                });
+            }
+
+            showInfo() {
+                const scene = this.scene;
+                const infoText = `👤 名称: ${this.characterName}\n🎭 ID: ${this.characterId}\n❤️ 状态: ${this.currentState}`;
+                
+                const info = scene.add.text(this.x, this.y - 150, infoText, {
+                    fontSize: '12px',
+                    fill: '#000',
+                    backgroundColor: '#fff',
+                    padding: { x: 10, y: 10 },
+                    lineSpacing: 5
+                });
+                info.setOrigin(0.5);
+                scene.time.delayedCall(4000, () => info.destroy());
+            }
+
+            showEffect(text) {
+                const scene = this.scene;
+                const effectText = scene.add.text(this.x, this.y - 50, text, {
+                    fontSize: '14px',
+                    fill: '#fff',
+                    backgroundColor: '#000',
+                    padding: { x: 8, y: 4 }
+                });
+                effectText.setOrigin(0.5);
+                
+                scene.tweens.add({
+                    targets: effectText,
+                    y: this.y - 80,
+                    alpha: 0,
+                    duration: 2000,
+                    onComplete: () => effectText.destroy()
+                });
+            }
+        }
+
+        // Home 场景
+        class Home extends Phaser.Scene {
+            constructor() {
+                super({ key: 'Home' });
+            }
+
+            create() {
+                console.log('🏠 主场景加载');
+                
+                this.add.rectangle(400, 300, 800, 600, 0x2c3e50);
+                
+                this.add.text(400, 30, '402 虚拟生活社区系统', {
+                    fontSize: '32px',
+                    fill: '#fff',
+                    fontStyle: 'bold'
+                }).setOrigin(0.5);
+                
+                this.characters = this.physics.add.group();
+                this.loadCharacters();
+                this.createUI();
+                this.showWelcomeMessage();
+                
+                console.log('✅ 主场景初始化完成');
+            }
+
+            async loadCharacters() {
+                try {
+                    const response = await fetch('/api/members');
+                    const members = await response.json();
+                    
+                    console.log('📋 加载成员:', members);
+                    
+                    members.forEach((member, index) => {
+                        const x = 200 + (index % 3) * 200;
+                        const y = 200 + Math.floor(index / 3) * 200;
+                        
+                        const char = new Character(this, x, y, member);
+                        this.characters.add(char);
+                    });
+                    
+                    console.log(`✅ 创建了 ${members.length} 个角色`);
+                } catch (error) {
+                    console.error('❌ 加载成员失败:', error);
+                    this.showError('无法加载成员数据');
+                }
+            }
+
+            createUI() {
+                const musicBtn = this.add.text(700, 50, '🎵 音乐', {
+                    fontSize: '16px',
+                    backgroundColor: '#4CAF50',
+                    padding: { x: 10, y: 5 },
+                    color: '#fff'
+                });
+                musicBtn.setInteractive();
+                musicBtn.on('pointerdown', () => this.showNotification('音乐播放器（开发中）'));
+                
+                const chatBtn = this.add.text(700, 100, '💬 聊天', {
+                    fontSize: '16px',
+                    backgroundColor: '#2196F3',
+                    padding: { x: 10, y: 5 },
+                    color: '#fff'
+                });
+                chatBtn.setInteractive();
+                chatBtn.on('pointerdown', () => this.showNotification('聊天室（开发中）'));
+                
+                const treeHoleBtn = this.add.text(700, 150, '🌳 树洞', {
+                    fontSize: '16px',
+                    backgroundColor: '#FF9800',
+                    padding: { x: 10, y: 5 },
+                    color: '#fff'
+                });
+                treeHoleBtn.setInteractive();
+                treeHoleBtn.on('pointerdown', () => this.showNotification('树洞（开发中）'));
+                
+                console.log('✅ UI 创建完成');
+            }
+
+            showNotification(message) {
+                const notification = this.add.text(400, 550, message, {
+                    fontSize: '16px',
+                    backgroundColor: '#000',
+                    color: '#fff',
+                    padding: { x: 20, y: 10 }
+                });
+                notification.setOrigin(0.5);
+                
+                this.tweens.add({
+                    targets: notification,
+                    alpha: 0,
+                    y: 500,
+                    duration: 2000,
+                    delay: 2000,
+                    onComplete: () => notification.destroy()
+                });
+            }
+
+            showWelcomeMessage() {
+                const welcome = this.add.text(400, 300, '欢迎来到 402 虚拟生活社区系统！\n\nPhaser 3 引擎已启动\n像素风角色系统就绪\n\n试试点击角色进行互动', {
+                    fontSize: '18px',
+                    fill: '#fff',
+                    backgroundColor: 'rgba(0,0,0,0.7)',
+                    padding: { x: 30, y: 20 },
+                    align: 'center',
+                    lineSpacing: 8
+                });
+                welcome.setOrigin(0.5);
+                
+                this.tweens.add({
+                    targets: welcome,
+                    alpha: 0,
+                    duration: 1000,
+                    delay: 5000,
+                    onComplete: () => welcome.destroy()
+                });
+            }
+
+            showError(message) {
+                const error = this.add.text(400, 300, `❌ ${message}`, {
+                    fontSize: '20px',
+                    fill: '#ff0000',
+                    backgroundColor: 'rgba(0,0,0,0.8)',
+                    padding: { x: 20, y: 10 }
+                });
+                error.setOrigin(0.5);
+                this.time.delayedCall(3000, () => error.destroy());
+            }
+        }
+
+        // Phaser 配置
+        const config = {
+            type: Phaser.AUTO,
+            width: 800,
+            height: 600,
+            parent: 'game-container',
+            backgroundColor: '#2c3e50',
+            pixelArt: true,
+            physics: {
+                default: 'arcade',
+                arcade: {
+                    gravity: { y: 0 },
+                    debug: false
+                }
+            },
+            scene: [Boot, Home],
+            scale: {
+                mode: Phaser.Scale.FIT,
+                autoCenter: Phaser.Scale.CENTER_BOTH
+            }
+        };
+
+        // 启动游戏
+        window.addEventListener('load', () => {
+            try {
+                const game = new Phaser.Game(config);
+                console.log('✅ Phaser 游戏启动成功');
+            } catch (error) {
+                console.error('❌ Phaser 启动失败:', error);
+                document.getElementById('game-container').innerHTML = `
+                    <div style="color: white; text-align: center; padding: 50px;">
+                        <h2>❌ 游戏启动失败</h2>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        });
+    </script>
 </body>
 </html>
